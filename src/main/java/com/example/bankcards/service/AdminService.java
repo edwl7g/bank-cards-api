@@ -12,7 +12,6 @@ import com.example.bankcards.repository.AccountRepository;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,8 +35,6 @@ public class AdminService {
         this.cardRepository = cardRepository;
     }
 
-
-
     /**
      * TODO:
      * ·	Администратор:
@@ -49,39 +46,56 @@ public class AdminService {
     public Card createCard(
             CreateCardDto dto
     ) {
-        //TODO 1. Проверяем существование пользователя
         User user = userRepository.findById(dto.userId())
                 .orElseThrow(() -> new EntityNotFoundException(
                         "User not found with id: " + dto.userId()
                 ));
-        //TODO 2. Проверяем существование счета и принадлежность пользователю
+
         Account account = accountRepository.findById(dto.accountId())
                 .orElseThrow(() -> new EntityNotFoundException("Account not found with id: " + dto.accountId()));
         if (!account.getUser().getId().equals(user.getId())) {
             throw new IllegalArgumentException("Account does not belong to the specified user");
         }
-        //TODO 3. Создаем новую карту
+
         Card card = new Card();
         card.setNumCard(generateCardNumber());
         card.setValidityPeriod(dto.validityPeriod());
         card.setCardStatus(CardStatus.ACTIVE);
         card.setUser(user);
         card.setAccount(account);
-        //TODO 4. Сохраняем
+
         return cardRepository.save(card);
     }
 
-    public void blockCard() {
+    @Transactional
+    public void blockCard(Long cardId) {
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new EntityNotFoundException("Card not found: " + cardId));
+        card.setCardStatus(CardStatus.BLOCKED);
+        cardRepository.save(card);
     }
 
-    public void activateCard() {
+    @Transactional
+    public void activateCard(Long cardId) {
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new EntityNotFoundException("Card not found: " + cardId));
+        if (card.getCardStatus() == CardStatus.ACTIVE) {
+            throw new IllegalStateException("Card already active");
+        }
+        card.setCardStatus(CardStatus.ACTIVE);
+        cardRepository.save(card);
     }
 
-    public void deleteCard() {
+    @Transactional
+    public void deleteCard(Long cardId) {
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new EntityNotFoundException("Card not found: " + cardId));
+        cardRepository.delete(card);
     }
 
+    // Получение всех карт
     public List<Card> getAllCards() {
-        return null;
+        return cardRepository.findAll();
     }
 
     @Transactional
@@ -131,12 +145,53 @@ public class AdminService {
                 ).collect(Collectors.toList());
     }
 
-    public User updateUser() {
-        return null;
+    // Обновление пользователя
+    @Transactional
+    public UserResponseDto updateUser(Long userId, UserUpdateDto dto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+
+        user.setFirstName(dto.firstName());
+        user.setLastName(dto.lastName());
+        user.setEmail(dto.email());
+        user.setPhone(dto.phone());
+        user.setIdentityDocumentNumber(dto.identityDocumentNumber());
+        user.setRole(dto.userRole());
+        user.setUserStatus(dto.userStatus());
+
+        User updated = userRepository.save(user);
+        return new UserResponseDto(
+                updated.getFirstName(),
+                updated.getLastName(),
+                updated.getRole(),
+                updated.getAccount(),
+                updated.getCard()
+        );
     }
 
-    public User deleteUser() {
-        return null;
+    // Удаление пользователя
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+
+        // Проверка: есть ли счета с ненулевым балансом
+        boolean hasNonZeroBalance = user.getAccount().stream()
+                .anyMatch(acc -> acc.getBalance().compareTo(BigDecimal.ZERO) != 0);
+        if (hasNonZeroBalance) {
+            throw new IllegalStateException("Cannot delete user with non-zero balance accounts");
+        }
+
+        // Удаляем связанные карты и счета (если каскады не настроены)
+        List<Card> cards = user.getCard();
+        if (cards != null && !cards.isEmpty()) {
+            cardRepository.deleteAll(cards);
+        }
+        List<Account> accounts = user.getAccount();
+        if (accounts != null && !accounts.isEmpty()) {
+            accountRepository.deleteAll(accounts);
+        }
+        userRepository.delete(user);
     }
 
     private String generateCardNumber() {

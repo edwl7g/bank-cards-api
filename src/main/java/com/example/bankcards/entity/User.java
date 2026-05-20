@@ -125,4 +125,8 @@ public class User {
     public void setCard(List<Card> card) {
         this.card = card;
     }
+
+    public void setUserStatus(UserStatus userStatus) {
+        this.userStatus = userStatus;
+    }
 }
