@@ -1,6 +1,6 @@
 package com.example.bankcards.entity;
 
-import com.example.bankcards.dto.UserCreateAccountDto;
+import com.example.bankcards.dto.CreateUserDto;
 
 import com.example.bankcards.entity.enums.UserRole;
 import com.example.bankcards.entity.enums.UserStatus;
@@ -16,7 +16,7 @@ public class User {
     public User() {
     }
 
-    public User(UserCreateAccountDto dto) {
+    public User(CreateUserDto dto) {
         firstName = dto.firstName();
         lastName = dto.lastName();
         email = dto.email();

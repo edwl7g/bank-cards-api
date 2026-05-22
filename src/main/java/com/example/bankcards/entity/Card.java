@@ -34,7 +34,6 @@ public class Card {
     @JoinColumn(name = "account_id")
     private Account account;
 
-
     public Long getId() {
         return id;
     }

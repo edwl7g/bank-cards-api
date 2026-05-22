@@ -1,6 +1,6 @@
 package com.example.bankcards.controller;
 
-import com.example.bankcards.dto.CreateAccountDto;
+import com.example.bankcards.dto.CreateBankAccountDto;
 import com.example.bankcards.service.AdminService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,8 +18,8 @@ public class AccountController {
     }
 
     @PostMapping("/create")
-    public CreateAccountDto createAccount(
-            @RequestBody CreateAccountDto dto
+    public CreateBankAccountDto createAccount(
+            @RequestBody CreateBankAccountDto dto
     ) {
         return adminService.createAccount(dto);
     }

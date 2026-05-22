@@ -1,9 +1,6 @@
 package com.example.bankcards.service;
 
-import com.example.bankcards.dto.CreateAccountDto;
-import com.example.bankcards.dto.CreateCardDto;
-import com.example.bankcards.dto.UserCreateAccountDto;
-import com.example.bankcards.dto.UserResponseDto;
+import com.example.bankcards.dto.*;
 import com.example.bankcards.entity.Account;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.entity.User;
@@ -12,13 +9,16 @@ import com.example.bankcards.repository.AccountRepository;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 @Service
 public class AdminService {
@@ -93,14 +93,14 @@ public class AdminService {
         cardRepository.delete(card);
     }
 
-    // Получение всех карт
-    public List<Card> getAllCards() {
-        return cardRepository.findAll();
+    // Пагинированный список всех карт (для администратора)
+    public Page<Card> getAllCards(Pageable pageable) {
+        return cardRepository.findAll(pageable);
     }
 
     @Transactional
-    public CreateAccountDto createAccount(
-            CreateAccountDto dto
+    public CreateBankAccountDto createAccount(
+            CreateBankAccountDto dto
     ) {
         User user = userRepository.findById(dto.userId())
                 .orElseThrow(() -> new EntityNotFoundException(
@@ -113,14 +113,14 @@ public class AdminService {
         account.setBalance(balance);
         account.setUser(user);
         Account response = accountRepository.save(account);
-        return new CreateAccountDto(
+        return new CreateBankAccountDto(
                 response.getId(),
                 response.getBalance()
         );
     }
 
     public UserResponseDto createUser(
-            UserCreateAccountDto dto
+            CreateUserDto dto
     ) {
         User entity = userRepository.save(new User(dto));
         return new UserResponseDto(
@@ -131,18 +131,21 @@ public class AdminService {
                 entity.getCard()
         );
     }
-    public List<UserResponseDto> getAllUsers() {
-        //TODO реализовать механизм Pageable
-        return userRepository.findAll()
-                .stream()
-                .map(e -> new UserResponseDto(
-                                e.getFirstName(),
-                                e.getLastName(),
-                                e.getRole(),
-                                e.getAccount(),
-                                e.getCard()
-                        )
-                ).collect(Collectors.toList());
+
+    public Page<UserResponseDto> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable)
+                .map(user -> new UserResponseDto(
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getRole(),
+                        user.getAccount(),
+                        user.getCard()
+                ));
+    }
+
+    public Page<User> getUsersByName(String firstname, String lastname, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending()); // или любая сортировка
+        return userRepository.findByFirstNameAndLastName(firstname, lastname, pageable);
     }
 
     // Обновление пользователя

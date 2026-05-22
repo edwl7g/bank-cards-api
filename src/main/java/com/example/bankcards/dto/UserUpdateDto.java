@@ -3,7 +3,7 @@ package com.example.bankcards.dto;
 import com.example.bankcards.entity.enums.UserRole;
 import com.example.bankcards.entity.enums.UserStatus;
 
-public record UserCreateAccountDto(
+public record UserUpdateDto(
         String firstName,
         String lastName,
         String email,
@@ -11,5 +11,4 @@ public record UserCreateAccountDto(
         String identityDocumentNumber,
         UserRole userRole,
         UserStatus userStatus
-) {
-}
+) {}
