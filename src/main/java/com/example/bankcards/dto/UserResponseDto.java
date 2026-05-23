@@ -7,6 +7,7 @@ import com.example.bankcards.entity.enums.UserRole;
 import java.util.List;
 
 public record UserResponseDto(
+        Long id,
         String firstName,
         String lastName,
         UserRole userRole,

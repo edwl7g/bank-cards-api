@@ -1,5 +1,6 @@
 package com.example.bankcards.controller;
 
+import com.example.bankcards.dto.CardResponseDto;
 import com.example.bankcards.dto.CreateCardDto;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.service.AdminService;
@@ -20,7 +21,7 @@ public class CardController {
     }
 
     @GetMapping
-    public Page<Card> getAllCards(@PageableDefault(size = 10, sort = "id") Pageable pageable) {
+    public Page<CardResponseDto> getAllCards(@PageableDefault(size = 10, sort = "id") Pageable pageable) {
         return adminService.getAllCards(pageable);
     }
 

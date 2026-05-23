@@ -129,4 +129,8 @@ public class User {
     public void setUserStatus(UserStatus userStatus) {
         this.userStatus = userStatus;
     }
+
+    public UserStatus getUserStatus() {
+        return userStatus;
+    }
 }

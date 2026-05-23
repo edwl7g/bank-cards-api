@@ -1,9 +1,13 @@
 package com.example.bankcards.service;
 
+import com.example.bankcards.dto.CardResponseDto;
 import com.example.bankcards.entity.Card;
+import com.example.bankcards.util.CardUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
 import java.math.BigDecimal;
+
 import com.example.bankcards.entity.Account;
 import com.example.bankcards.entity.User;
 import com.example.bankcards.entity.enums.CardStatus;
@@ -30,7 +34,7 @@ public class UserService {
     }
 
     // Просмотр своих карт с поиском по номеру карты и пагинацией
-    public Page<Card> getUserCards(Long userId, String search, Pageable pageable) {
+    public Page<CardResponseDto> getUserCards(Long userId, String search, Pageable pageable) {
         // Проверяем существование пользователя
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found: " + userId));
@@ -38,9 +42,27 @@ public class UserService {
         if (search != null && !search.isBlank()) {
             // Поиск по номеру карты (игнорируя дефисы/пробелы)
             String normalizedSearch = search.replaceAll("[-\\s]", "");
-            return cardRepository.findByUserIdAndNumCardContainingIgnoreCase(userId, normalizedSearch, pageable);
+            return cardRepository.findByUserIdAndNumCardContainingIgnoreCase(userId, normalizedSearch, pageable)
+                    .map(card -> new CardResponseDto(
+                                    card.getId(),
+                                    CardUtil.maskCardNumber(card.getNumCard()),
+                                    card.getValidityPeriod(),
+                                    card.getCardStatus(),
+                                    card.getUser().getId(),
+                                    card.getUser().getFirstName() + " " + card.getUser().getLastName(),
+                                    card.getAccount().getId()
+                    ));
         } else {
-            return cardRepository.findByUserId(userId, pageable);
+            return cardRepository.findByUserId(userId, pageable)
+                    .map(card -> new CardResponseDto(
+                            card.getId(),
+                            CardUtil.maskCardNumber(card.getNumCard()),
+                            card.getValidityPeriod(),
+                            card.getCardStatus(),
+                            card.getUser().getId(),
+                            card.getUser().getFirstName() + " " + card.getUser().getLastName(),
+                            card.getAccount().getId()
+                    ));
         }
     }
 

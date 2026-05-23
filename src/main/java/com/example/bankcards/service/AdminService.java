@@ -8,6 +8,7 @@ import com.example.bankcards.entity.enums.CardStatus;
 import com.example.bankcards.repository.AccountRepository;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.repository.UserRepository;
+import com.example.bankcards.util.CardUtil;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -94,8 +95,20 @@ public class AdminService {
     }
 
     // Пагинированный список всех карт (для администратора)
-    public Page<Card> getAllCards(Pageable pageable) {
-        return cardRepository.findAll(pageable);
+    public Page<CardResponseDto> getAllCards(Pageable pageable) {
+        return cardRepository.findAll(pageable)
+                .map(card -> new CardResponseDto(
+                 card.getId(),
+                 CardUtil.maskCardNumber(card.getNumCard()),
+                        card.getValidityPeriod(),
+                        card.getCardStatus(),
+                        card.getUser().getId(),
+                        card.getUser().getFirstName()
+                                .concat(" ")
+                                .concat(
+                                card.getUser().getLastName()),
+                        card.getAccount().getId()
+                ));
     }
 
     @Transactional
@@ -124,6 +137,7 @@ public class AdminService {
     ) {
         User entity = userRepository.save(new User(dto));
         return new UserResponseDto(
+                entity.getId(),
                 entity.getFirstName(),
                 entity.getLastName(),
                 entity.getRole(),
@@ -135,6 +149,7 @@ public class AdminService {
     public Page<UserResponseDto> getAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable)
                 .map(user -> new UserResponseDto(
+                        user.getId(),
                         user.getFirstName(),
                         user.getLastName(),
                         user.getRole(),
@@ -143,9 +158,18 @@ public class AdminService {
                 ));
     }
 
-    public Page<User> getUsersByName(String firstname, String lastname, int page, int size) {
+    public Page<UserSummaryDto> getUsersByName(String firstname, String lastname, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending()); // или любая сортировка
-        return userRepository.findByFirstNameAndLastName(firstname, lastname, pageable);
+        return userRepository.findByFirstNameAndLastName(firstname, lastname, pageable)
+                .map(user -> new UserSummaryDto(
+                        user.getId(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getEmail(),
+                        user.getPhone(),
+                        user.getRole(),
+                        user.getUserStatus()
+                ));
     }
 
     // Обновление пользователя
@@ -164,6 +188,7 @@ public class AdminService {
 
         User updated = userRepository.save(user);
         return new UserResponseDto(
+                updated.getId(),
                 updated.getFirstName(),
                 updated.getLastName(),
                 updated.getRole(),

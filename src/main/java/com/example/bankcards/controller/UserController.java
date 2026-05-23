@@ -1,10 +1,6 @@
 package com.example.bankcards.controller;
 
-import com.example.bankcards.dto.CreateUserDto;
-import com.example.bankcards.dto.UserResponseDto;
-import com.example.bankcards.dto.UserUpdateDto;
-import com.example.bankcards.entity.Card;
-import com.example.bankcards.entity.User;
+import com.example.bankcards.dto.*;
 import com.example.bankcards.service.AdminService;
 import com.example.bankcards.service.UserService;
 import org.springframework.data.domain.Page;
@@ -46,18 +42,18 @@ public class UserController {
     }
 
     @GetMapping("/find")
-    public Page<User> getUser(@RequestParam("firstname") String firstName,
-                              @RequestParam("lastname") String lastName,
-                              @RequestParam(defaultValue = "0") int page,
-                              @RequestParam(defaultValue = "10") int size) {
+    public Page<UserSummaryDto> getUser(@RequestParam("firstname") String firstName,
+                                        @RequestParam("lastname") String lastName,
+                                        @RequestParam(defaultValue = "0") int page,
+                                        @RequestParam(defaultValue = "10") int size) {
         return adminService.getUsersByName(firstName, lastName, page, size);
     }
 
     // Просмотр своих карт (поиск + пагинация)
     @GetMapping("/cards")
-    public Page<Card> getUserCards(@RequestParam Long userId,
-                                   @RequestParam(required = false) String search,
-                                   @PageableDefault(size = 10) Pageable pageable) {
+    public Page<CardResponseDto> getUserCards(@RequestParam Long userId,
+                                              @RequestParam(required = false) String search,
+                                              @PageableDefault(size = 10) Pageable pageable) {
         return userService.getUserCards(userId, search, pageable);
     }
 
