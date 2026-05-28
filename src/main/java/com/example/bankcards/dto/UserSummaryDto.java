@@ -9,6 +9,7 @@ public record UserSummaryDto(
         String lastName,
         String email,
         String phone,
+        String identityDocumentNumber,
         UserRole userRole,
         UserStatus userStatus
 ) {}

@@ -1,8 +1,10 @@
 package com.example.bankcards.service;
 
+import com.example.bankcards.dto.CardDetailsDto;
 import com.example.bankcards.dto.CardResponseDto;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.util.CardUtil;
+import com.example.bankcards.util.HmacUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -41,8 +43,12 @@ public class UserService {
 
         if (search != null && !search.isBlank()) {
             // Поиск по номеру карты (игнорируя дефисы/пробелы)
-            String normalizedSearch = search.replaceAll("[-\\s]", "");
-            return cardRepository.findByUserIdAndNumCardContainingIgnoreCase(userId, normalizedSearch, pageable)
+            String digits = search.replaceAll("\\D", "");
+            if (digits.length() != 4) {
+                return Page.empty(pageable); // или бросить исключение, но лучше пустая страница
+            }
+            String hash = HmacUtil.hmac(digits);
+            return cardRepository.findByUserIdAndNumCardLastFourHash(userId, hash, pageable)
                     .map(card -> new CardResponseDto(
                                     card.getId(),
                                     CardUtil.maskCardNumber(card.getNumCard()),
@@ -138,5 +144,48 @@ public class UserService {
             throw new IllegalStateException("Card not linked to account");
         }
         return account.getBalance();
+    }
+
+    // UserService.java – добавьте эти методы
+
+    // Получение карты по ID с проверкой принадлежности пользователю
+    public CardDetailsDto getCardByIdForUser(Long cardId, Long userId) {
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new EntityNotFoundException("Card not found: " + cardId));
+        if (!card.getUser().getId().equals(userId)) {
+            throw new SecurityException("Card does not belong to the user");
+        }
+        return toCardDetailsDto(card, false);
+    }
+
+    /**
+     * Получение карты по номеру (только по последним 4 цифрам) с проверкой принадлежности пользователю
+     */
+    public CardDetailsDto getCardByNumberForUser(String cardNumber, Long userId) {
+        String digits = cardNumber.replaceAll("\\D", "");
+        if (digits.length() != 4) {
+            throw new IllegalArgumentException("Please provide the last 4 digits of the card");
+        }
+        String hash = HmacUtil.hmac(digits);
+        Card card = cardRepository.findByUserIdAndNumCardLastFourHash(userId, hash)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Card not found for user with last 4 digits: " + digits));
+        return toCardDetailsDto(card, false);
+    }
+
+    private CardDetailsDto toCardDetailsDto(Card card, boolean showFullNumber) {
+        String fullNumber = showFullNumber ? card.getNumCard() : null;
+        return new CardDetailsDto(
+                card.getId(),
+                CardUtil.maskCardNumber(card.getNumCard()),
+                fullNumber,
+                card.getValidityPeriod(),
+                card.getCardStatus(),
+                card.getUser().getId(),
+                card.getUser().getFirstName() + " " + card.getUser().getLastName(),
+                card.getUser().getEmail(),
+                card.getAccount().getId(),
+                card.getAccount().getBalance()
+        );
     }
 }

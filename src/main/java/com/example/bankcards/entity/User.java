@@ -4,6 +4,7 @@ import com.example.bankcards.dto.CreateUserDto;
 
 import com.example.bankcards.entity.enums.UserRole;
 import com.example.bankcards.entity.enums.UserStatus;
+import com.example.bankcards.util.converter.CryptoConverter;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
@@ -34,10 +35,13 @@ public class User {
 
     private String lastName;
 
+    @Convert(converter = CryptoConverter.class)
     private String email;
 
+    @Convert(converter = CryptoConverter.class)
     private String phone;
 
+    @Convert(converter = CryptoConverter.class)
     private String identityDocumentNumber;
 
     @Enumerated(EnumType.STRING)

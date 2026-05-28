@@ -1,10 +1,13 @@
 package com.example.bankcards.entity;
 
 import com.example.bankcards.entity.enums.CardStatus;
+import com.example.bankcards.util.HmacUtil;
+import com.example.bankcards.util.converter.CryptoConverter;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
 
 @Entity
 @Table(name = "card")
@@ -14,8 +17,12 @@ public class Card {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "num_card")
+    @Convert(converter = CryptoConverter.class)
+    @Column(name = "num_card", nullable = false)
     private String numCard;
+
+    @Column(name = "num_card_last_four_hash", length = 64)
+    private String numCardLastFourHash;
 
     @JsonBackReference
     @ManyToOne
@@ -48,6 +55,13 @@ public class Card {
 
     public void setNumCard(String numCard) {
         this.numCard = numCard;
+        if (numCard != null && numCard.length() >= 4) {
+            String digits = numCard.replaceAll("\\D", "");
+            String lastFour = digits.substring(digits.length() - 4);
+            this.numCardLastFourHash = HmacUtil.hmac(lastFour); // метод ниже
+        } else {
+            throw new IllegalArgumentException("Card number is too short to extract last 4 digits");
+        }
     }
 
     public User getUser() {

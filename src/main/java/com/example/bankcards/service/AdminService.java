@@ -112,7 +112,7 @@ public class AdminService {
     }
 
     @Transactional
-    public CreateBankAccountDto createAccount(
+    public ResponseCreateBankAccountDto createAccount(
             CreateBankAccountDto dto
     ) {
         User user = userRepository.findById(dto.userId())
@@ -126,7 +126,7 @@ public class AdminService {
         account.setBalance(balance);
         account.setUser(user);
         Account response = accountRepository.save(account);
-        return new CreateBankAccountDto(
+        return new ResponseCreateBankAccountDto(
                 response.getId(),
                 response.getBalance()
         );
@@ -167,6 +167,7 @@ public class AdminService {
                         user.getLastName(),
                         user.getEmail(),
                         user.getPhone(),
+                        user.getIdentityDocumentNumber(),
                         user.getRole(),
                         user.getUserStatus()
                 ));
@@ -220,6 +221,37 @@ public class AdminService {
             accountRepository.deleteAll(accounts);
         }
         userRepository.delete(user);
+    }
+
+    public CardDetailsDto getCardByIdForAdmin(Long cardId) {
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new EntityNotFoundException("Card not found: " + cardId));
+        return toCardDetailsDto(card, true);
+    }
+
+    public CardDetailsDto getCardByNumberForAdmin(String cardNumber) {
+        String normalized = CardUtil.extractDigits(cardNumber);
+        Card card = cardRepository.findByNumCardContaining(normalized)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Card not found with number: " + cardNumber));
+        return toCardDetailsDto(card, true);
+    }
+
+    private CardDetailsDto toCardDetailsDto(Card card, boolean showFullNumber) {
+        String fullNumber = showFullNumber ? card.getNumCard() : null;
+        return new CardDetailsDto(
+                card.getId(),
+                CardUtil.maskCardNumber(card.getNumCard()),
+                fullNumber,
+                card.getValidityPeriod(),
+                card.getCardStatus(),
+                card.getUser().getId(),
+                card.getUser().getFirstName() + " " + card.getUser().getLastName(),
+                card.getUser().getEmail(),
+                card.getAccount().getId(),
+                card.getAccount().getBalance()
+        );
     }
 
     private String generateCardNumber() {

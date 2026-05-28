@@ -1,7 +1,9 @@
 package com.example.bankcards.controller;
 
 import com.example.bankcards.dto.CreateBankAccountDto;
+import com.example.bankcards.dto.ResponseCreateBankAccountDto;
 import com.example.bankcards.service.AdminService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,8 +20,8 @@ public class AccountController {
     }
 
     @PostMapping("/create")
-    public CreateBankAccountDto createAccount(
-            @RequestBody CreateBankAccountDto dto
+    public ResponseCreateBankAccountDto createAccount(
+            @RequestBody @Valid CreateBankAccountDto dto
     ) {
         return adminService.createAccount(dto);
     }

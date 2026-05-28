@@ -9,4 +9,9 @@ public class CardUtil {
         String last4 = digits.substring(digits.length() - 4);
         return "**** **** **** " + last4;
     }
+    // CardUtil.java
+    public static String extractDigits(String input) {
+        if (input == null) return "";
+        return input.replaceAll("\\D", "");
+    }
 }

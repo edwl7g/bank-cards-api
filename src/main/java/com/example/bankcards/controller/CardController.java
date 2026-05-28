@@ -1,9 +1,11 @@
 package com.example.bankcards.controller;
 
+import com.example.bankcards.dto.CardDetailsDto;
 import com.example.bankcards.dto.CardResponseDto;
 import com.example.bankcards.dto.CreateCardDto;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.service.AdminService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -28,7 +30,7 @@ public class CardController {
     // Создание карты
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Card createCard(@RequestBody CreateCardDto dto) {
+    public Card createCard(@RequestBody @Valid CreateCardDto dto) {
         return adminService.createCard(dto);
     }
 
@@ -53,4 +55,14 @@ public class CardController {
         adminService.deleteCard(cardId);
     }
 
+    // CardController.java
+    @GetMapping("/{cardId}")
+    public CardDetailsDto getCardById(@PathVariable Long cardId) {
+        return adminService.getCardByIdForAdmin(cardId);
+    }
+
+    @GetMapping("/details")
+    public CardDetailsDto getCardByNumber(@RequestParam("number") String cardNumber) {
+        return adminService.getCardByNumberForAdmin(cardNumber);
+    }
 }

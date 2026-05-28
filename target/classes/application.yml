@@ -17,3 +17,7 @@ spring:
     show-sql: true
   liquibase:
     enabled: false   # отключаем Liquibase
+
+app:
+  crypto:
+    key: 7QZ5VdQDghh3iCeGEp8N8W5JR1dZT31IgrjeB8vaBfE=
