@@ -4,6 +4,7 @@ import com.example.bankcards.dto.CreateUserDto;
 
 import com.example.bankcards.entity.enums.UserRole;
 import com.example.bankcards.entity.enums.UserStatus;
+import com.example.bankcards.util.HmacUtil;
 import com.example.bankcards.util.converter.CryptoConverter;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -18,13 +19,13 @@ public class User {
     }
 
     public User(CreateUserDto dto) {
-        firstName = dto.firstName();
-        lastName = dto.lastName();
-        email = dto.email();
-        phone = dto.phone();
-        identityDocumentNumber = dto.identityDocumentNumber();
-        userRole = dto.userRole();
-        userStatus = dto.userStatus();
+        setFirstName(dto.firstName());
+        setLastName(dto.lastName());
+        setEmail(dto.email());           // ← теперь вызовет вычисление emailHash
+        setPhone(dto.phone());
+        setIdentityDocumentNumber(dto.identityDocumentNumber());
+        setRole(dto.userRole());
+        setUserStatus(dto.userStatus());
     }
 
     @Id
@@ -37,6 +38,12 @@ public class User {
 
     @Convert(converter = CryptoConverter.class)
     private String email;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Column(name = "email_hash", unique = true)
+    private String emailHash;
 
     @Convert(converter = CryptoConverter.class)
     private String phone;
@@ -88,6 +95,11 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+        if (email != null && !email.isBlank()) {
+            this.emailHash = HmacUtil.hmac(email);
+        } else {
+            this.emailHash = null;
+        }
     }
 
     public String getPhone() {
@@ -136,5 +148,29 @@ public class User {
 
     public UserStatus getUserStatus() {
         return userStatus;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getEmailHash() {
+        return emailHash;
+    }
+
+    public void setEmailHash(String emailHash) {
+        this.emailHash = emailHash;
+    }
+
+    public UserRole getUserRole() {
+        return userRole;
+    }
+
+    public void setUserRole(UserRole userRole) {
+        this.userRole = userRole;
     }
 }

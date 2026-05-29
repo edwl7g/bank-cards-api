@@ -5,15 +5,20 @@ import com.example.bankcards.entity.Account;
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.entity.User;
 import com.example.bankcards.entity.enums.CardStatus;
+import com.example.bankcards.entity.enums.UserRole;
 import com.example.bankcards.repository.AccountRepository;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.repository.UserRepository;
+import com.example.bankcards.security.CustomUserDetails;
 import com.example.bankcards.util.CardUtil;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,10 +35,13 @@ public class AdminService {
 
     private final CardRepository cardRepository;
 
-    public AdminService(UserRepository userRepository, AccountRepository accountRepository, CardRepository cardRepository) {
+    private final PasswordEncoder passwordEncoder;
+
+    public AdminService(UserRepository userRepository, AccountRepository accountRepository, CardRepository cardRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.accountRepository = accountRepository;
         this.cardRepository = cardRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -98,15 +106,15 @@ public class AdminService {
     public Page<CardResponseDto> getAllCards(Pageable pageable) {
         return cardRepository.findAll(pageable)
                 .map(card -> new CardResponseDto(
-                 card.getId(),
-                 CardUtil.maskCardNumber(card.getNumCard()),
+                        card.getId(),
+                        CardUtil.maskCardNumber(card.getNumCard()),
                         card.getValidityPeriod(),
                         card.getCardStatus(),
                         card.getUser().getId(),
                         card.getUser().getFirstName()
                                 .concat(" ")
                                 .concat(
-                                card.getUser().getLastName()),
+                                        card.getUser().getLastName()),
                         card.getAccount().getId()
                 ));
     }
@@ -132,17 +140,27 @@ public class AdminService {
         );
     }
 
-    public UserResponseDto createUser(
-            CreateUserDto dto
-    ) {
-        User entity = userRepository.save(new User(dto));
+    @Transactional
+    public UserResponseDto createUser(CreateUserDto dto) {
+        // Запрещаем создание новых администраторов, если в БД уже есть хотя бы один ADMIN
+        if (dto.userRole() == UserRole.ADMIN) {
+            boolean adminExists = userRepository.existsByUserRole(UserRole.ADMIN);
+            if (adminExists) {
+                throw new IllegalStateException("Cannot create another admin. Only one admin is allowed.");
+            }
+        }
+        User user = new User(dto);
+        // пароль должен быть передан в dto, закодируем его
+        user.setPassword(passwordEncoder.encode(dto.password()));
+        // emailHash вычиститься автоматически в setEmail
+        User saved = userRepository.save(user);
         return new UserResponseDto(
-                entity.getId(),
-                entity.getFirstName(),
-                entity.getLastName(),
-                entity.getRole(),
-                entity.getAccount(),
-                entity.getCard()
+                saved.getId(),
+                saved.getFirstName(),
+                saved.getLastName(),
+                saved.getRole(),
+                saved.getAccount(),
+                saved.getCard()
         );
     }
 
@@ -178,6 +196,10 @@ public class AdminService {
     public UserResponseDto updateUser(Long userId, UserUpdateDto dto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+        // Если пытаются установить роль ADMIN, но у пользователя она уже была другой
+        if (dto.userRole() == UserRole.ADMIN && user.getRole() != UserRole.ADMIN) {
+            throw new IllegalStateException("Cannot promote user to ADMIN. Only one admin is allowed.");
+        }
 
         user.setFirstName(dto.firstName());
         user.setLastName(dto.lastName());
@@ -203,6 +225,17 @@ public class AdminService {
     public void deleteUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+
+        if (user.getRole() == UserRole.ADMIN) {
+            throw new IllegalStateException("Cannot delete admin user");
+        }
+
+        // Получаем текущего аутентифицированного пользователя
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails currentUser = (CustomUserDetails) authentication.getPrincipal();
+        if (currentUser.getUserId().equals(userId)) {
+            throw new IllegalStateException("You cannot delete your own admin account");
+        }
 
         // Проверка: есть ли счета с ненулевым балансом
         boolean hasNonZeroBalance = user.getAccount().stream()

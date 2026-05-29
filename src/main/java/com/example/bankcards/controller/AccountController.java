@@ -4,6 +4,7 @@ import com.example.bankcards.dto.CreateBankAccountDto;
 import com.example.bankcards.dto.ResponseCreateBankAccountDto;
 import com.example.bankcards.service.AdminService;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/account")
+@PreAuthorize("hasRole('ADMIN')")   // ← все методы этого класса требуют ADMIN
 public class AccountController {
 
     private final AdminService adminService;

@@ -29,5 +29,8 @@ public record CreateUserDto(
         UserRole userRole,
 
         @NotNull(message = "User status is required")
-        UserStatus userStatus
+        UserStatus userStatus,
+
+        @NotNull(message = "Password is required")
+        String password
 ) {}

@@ -21,3 +21,7 @@ spring:
 app:
   crypto:
     key: 7QZ5VdQDghh3iCeGEp8N8W5JR1dZT31IgrjeB8vaBfE=
+
+jwt:
+  secret: mySecretKeyForJWT12345678901234567890
+  expiration: 86400000
