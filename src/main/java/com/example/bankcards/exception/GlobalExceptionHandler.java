@@ -1,4 +1,3 @@
-// exception/GlobalExceptionHandler.java
 package com.example.bankcards.exception;
 
 import com.example.bankcards.dto.ErrorResponse;
@@ -97,6 +96,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex, WebRequest request) {
+        String path = getPath(request);
+        // Пропускаем запросы к Swagger (чтобы не мешать генерации документации)
+        if (path.startsWith("/v3/api-docs") || path.startsWith("/swagger-ui")) {
+            // Пробрасываем исключение дальше, чтобы SpringDoc сам его обработал
+            if (ex instanceof RuntimeException) throw (RuntimeException) ex;
+            throw new RuntimeException(ex);
+        }
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Internal Server Error",
@@ -110,4 +116,5 @@ public class GlobalExceptionHandler {
     private String getPath(WebRequest request) {
         return request.getDescription(false).replace("uri=", "");
     }
+
 }

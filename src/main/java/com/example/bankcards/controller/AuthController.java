@@ -3,7 +3,7 @@ package com.example.bankcards.controller;
 import com.example.bankcards.dto.AuthRequestDto;
 import com.example.bankcards.dto.AuthResponseDto;
 import com.example.bankcards.security.CustomUserDetails;
-import com.example.bankcards.security.JwtUtil;
+import com.example.bankcards.util.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

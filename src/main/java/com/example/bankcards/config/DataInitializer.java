@@ -1,4 +1,4 @@
-package com.example.bankcards.security;
+package com.example.bankcards.config;
 
 import com.example.bankcards.entity.User;
 import com.example.bankcards.entity.enums.UserRole;

@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,6 +24,7 @@ public class CardController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public Page<CardResponseDto> getAllCards(@PageableDefault(size = 10, sort = "id") Pageable pageable) {
         return adminService.getAllCards(pageable);
     }
@@ -30,6 +32,7 @@ public class CardController {
     // Создание карты
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ADMIN')")
     public Card createCard(@RequestBody @Valid CreateCardDto dto) {
         return adminService.createCard(dto);
     }
@@ -37,6 +40,7 @@ public class CardController {
     // Блокировка карты
     @PostMapping("/{cardId}/block")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void blockCard(@PathVariable Long cardId) {
         adminService.blockCard(cardId);
     }
@@ -44,6 +48,7 @@ public class CardController {
     // Активация карты
     @PostMapping("/{cardId}/activate")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void activateCard(@PathVariable Long cardId) {
         adminService.activateCard(cardId);
     }
@@ -51,17 +56,20 @@ public class CardController {
     // Удаление карты
     @DeleteMapping("/{cardId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteCard(@PathVariable Long cardId) {
         adminService.deleteCard(cardId);
     }
 
     // CardController.java
     @GetMapping("/{cardId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public CardDetailsDto getCardById(@PathVariable Long cardId) {
         return adminService.getCardByIdForAdmin(cardId);
     }
 
     @GetMapping("/details")
+    @PreAuthorize("hasRole('ADMIN')")
     public CardDetailsDto getCardByNumber(@RequestParam("number") String cardNumber) {
         return adminService.getCardByNumberForAdmin(cardNumber);
     }

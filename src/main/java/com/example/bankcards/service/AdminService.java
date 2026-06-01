@@ -44,13 +44,6 @@ public class AdminService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    /**
-     * TODO:
-     * ·	Администратор:
-     * ·	  - Создает, блокирует, активирует, удаляет карты
-     * ·	  - Управляет пользователями
-     * ·	  - Видит все карты
-     */
     @Transactional
     public Card createCard(
             CreateCardDto dto
