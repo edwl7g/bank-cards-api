@@ -31,6 +31,9 @@ public class DataInitializer implements CommandLineRunner {
             admin.setPassword(passwordEncoder.encode("admin123"));
             admin.setRole(UserRole.ADMIN);
             admin.setUserStatus(UserStatus.ACTIVE);
+            // Добавляем недостающие поля:
+            admin.setPhone("+70000000000");                // ← добавить
+            admin.setIdentityDocumentNumber("0000000000"); // ← добавить
             userRepository.save(admin);
         }
     }

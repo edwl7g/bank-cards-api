@@ -1,27 +1,38 @@
-#
-# docker-compose.yml — определяет сервисы для разработки и тестирования.
-#
-#Что нужно сделать:
-#  - Настроить сервисы для:
-#      - PostgreSQL (или MySQL) с начальной базой.
-#      - Приложения Spring Boot (если нужно).
-#  - Открыть нужные порты (например, 5432, 8080).
-#  - Настроить volume для хранения данных БД.
+version: '3.8'
 
-#version: '3.8'
-#
-#services:
-#  postgres:
-#    image: postgres:16
-#    container_name: bank_postgres
-#    environment:
-#      POSTGRES_DB: bank
-#      POSTGRES_USER: postgres
-#      POSTGRES_PASSWORD: adsdfhsdfhmin   # замените на свой пароль, если нужно
-#    ports:
-#      - "5432:5432"
-#    volumes:
-#      - postgres_data:/var/lib/postgresql/data
-#
-#volumes:
-#  postgres_data:
+services:
+  postgres:
+    image: postgres:16
+    container_name: bank_postgres
+    environment:
+      POSTGRES_DB: bank
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: adsdfhsdfhmin
+    ports:
+      - "5433:5432"   # ← внешний порт 5433 → внутренний 5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: bank_app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bank   # внутри сети используется имя сервиса postgres:5432
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: adsdfhsdfhmin
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none      # управляется Liquibase
+      SPRING_LIQUIBASE_ENABLED: "true"
+      SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/migration/db.changelog-master.xml
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:

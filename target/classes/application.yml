@@ -13,14 +13,16 @@ spring:
     password: admin
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     show-sql: true
   liquibase:
-    enabled: false   # отключаем Liquibase
+    drop-first: true
+    enabled: true
+    change-log: classpath:db/migration/db.changelog-master.xml
 
 app:
   crypto:
-    key: 7QZ5VdQDghh3iCeGEp8N8W5JR1dZT31IgrjeB8vaBfE=
+    key: 8Hy/NpB0VqQKWAvrdkRADcATvs14obOYwokw19r0PYY=
 
 jwt:
   secret: mySecretKeyForJWT12345678901234567890

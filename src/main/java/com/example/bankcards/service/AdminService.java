@@ -189,7 +189,13 @@ public class AdminService {
     public UserResponseDto updateUser(Long userId, UserUpdateDto dto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
-        // Если пытаются установить роль ADMIN, но у пользователя она уже была другой
+
+        // 1. Запрещаем изменение роли у администратора (если пользователь - администратор)
+        if (user.getRole() == UserRole.ADMIN && dto.userRole() != UserRole.ADMIN) {
+            throw new IllegalStateException("Cannot change role of an admin user");
+        }
+
+        // 2. Запрещаем повышение обычного пользователя до администратора (уже есть, но оставим)
         if (dto.userRole() == UserRole.ADMIN && user.getRole() != UserRole.ADMIN) {
             throw new IllegalStateException("Cannot promote user to ADMIN. Only one admin is allowed.");
         }
