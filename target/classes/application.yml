@@ -8,9 +8,9 @@
 #  - Включить Swagger UI.
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/bank
-    username: postgres
-    password: admin
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: none
@@ -22,8 +22,8 @@ spring:
 
 app:
   crypto:
-    key: 8Hy/NpB0VqQKWAvrdkRADcATvs14obOYwokw19r0PYY=
+    key: ${APP_CRYPTO_KEY}
 
 jwt:
-  secret: mySecretKeyForJWT12345678901234567890
-  expiration: 86400000
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION}

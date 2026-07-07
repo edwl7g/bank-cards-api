@@ -5,11 +5,11 @@ services:
     image: postgres:16
     container_name: bank_postgres
     environment:
-      POSTGRES_DB: bank
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: adsdfhsdfhmin
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "5433:5432"   # ← внешний порт 5433 → внутренний 5432
+      - "${DB_PORT:-5433}:5432"   # ← внешний порт 5433 → внутренний 5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -25,12 +25,15 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bank   # внутри сети используется имя сервиса postgres:5432
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: adsdfhsdfhmin
-      SPRING_JPA_HIBERNATE_DDL_AUTO: none      # управляется Liquibase
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bank   # внутри сети всегда так
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
       SPRING_LIQUIBASE_ENABLED: "true"
       SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/migration/db.changelog-master.xml
+      APP_CRYPTO_KEY: ${APP_CRYPTO_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
     ports:
       - "8080:8080"
 
