@@ -23,12 +23,12 @@ public class DataInitializer implements CommandLineRunner {
     // конструктор
     @Override
     public void run(String... args) {
-        if (userRepository.findByEmailHash(HmacUtil.hmac("admin@example.com")).isEmpty()) {
+        if (userRepository.findByEmailHash(HmacUtil.hmac(System.getenv("ADMIN_EMAIL"))).isEmpty()) {
             User admin = new User();
-            admin.setEmail("admin@example.com");
+            admin.setEmail(System.getenv("ADMIN_EMAIL"));
             admin.setFirstName("Admin");
             admin.setLastName("Admin");
-            admin.setPassword(passwordEncoder.encode("admin123"));
+            admin.setPassword(passwordEncoder.encode(System.getenv("ADMIN_PASSWORD")));
             admin.setRole(UserRole.ADMIN);
             admin.setUserStatus(UserStatus.ACTIVE);
             // Добавляем недостающие поля:
