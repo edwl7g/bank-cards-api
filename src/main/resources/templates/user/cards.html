@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Мои карты</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between">
+        <h2>Мои карты</h2>
+        <a th:href="@{/web/dashboard}" class="btn btn-secondary">Назад</a>
+    </div>
+
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+    <div class="mb-3">
+        <form th:action="@{/web/user/cards}" method="get" class="row g-3">
+            <div class="col-auto">
+                <input type="text" name="search" class="form-control" placeholder="Поиск по номеру" th:value="${search}">
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Искать</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="row">
+        <div th:each="card : ${cards.content}" class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${card.maskedNumber}"></h5>
+                    <p class="card-text">
+                        <strong>Статус:</strong> <span th:text="${card.cardStatus}"></span><br>
+                        <strong>Действительна до:</strong> <span th:text="${card.validityPeriod}"></span>
+                    </p>
+                    <a th:href="@{/web/user/cards/{id}(id=${card.id})}" class="btn btn-info btn-sm">Подробнее</a>
+                    <a th:href="@{/web/user/cards/{id}/balance(id=${card.id})}" class="btn btn-secondary btn-sm">Баланс</a>
+                    <form th:action="@{/web/user/cards/{id}/block-request(id=${card.id})}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-warning btn-sm">Заблокировать</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav th:if="${cards.totalPages > 1}">
+        <ul class="pagination">
+            <li class="page-item" th:classappend="${cards.first} ? 'disabled'">
+                <a class="page-link" th:href="@{/web/user/cards(page=${cards.number-1}, search=${search})}">Предыдущая</a>
+            </li>
+            <li class="page-item" th:classappend="${cards.last} ? 'disabled'">
+                <a class="page-link" th:href="@{/web/user/cards(page=${cards.number+1}, search=${search})}">Следующая</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+</body>
+</html>

@@ -1,4 +1,4 @@
-package com.example.bankcards.controller;
+package com.example.bankcards.controller.rest;
 
 import com.example.bankcards.dto.CreateBankAccountDto;
 import com.example.bankcards.dto.ResponseCreateBankAccountDto;

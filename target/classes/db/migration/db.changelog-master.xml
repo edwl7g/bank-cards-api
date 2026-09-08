@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <!-- Включаем первый скрипт -->
+    <include file="db/migration/v1.0.0__initial_schema.sql"/>
+
+    <!-- В будущем добавляем новые миграции -->
+    <!-- <include file="db/migration/v1.1.0__add_indexes.sql"/> -->
+
+</databaseChangeLog>

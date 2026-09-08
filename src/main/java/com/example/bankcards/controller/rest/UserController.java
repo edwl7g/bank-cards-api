@@ -1,4 +1,4 @@
-package com.example.bankcards.controller;
+package com.example.bankcards.controller.rest;
 
 import com.example.bankcards.dto.*;
 import com.example.bankcards.security.CustomUserDetails;

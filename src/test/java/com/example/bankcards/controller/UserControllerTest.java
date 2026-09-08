@@ -1,5 +1,6 @@
 package com.example.bankcards.controller;
 
+import com.example.bankcards.controller.rest.UserController;
 import com.example.bankcards.dto.*;
 import com.example.bankcards.entity.User;
 import com.example.bankcards.entity.enums.UserRole;

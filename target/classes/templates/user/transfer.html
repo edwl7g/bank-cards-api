@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Перевод</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <h2>Перевод между своими картами</h2>
+    <form th:action="@{/web/user/transfer}" method="post">
+        <div class="mb-3">
+            <label>С карты (ID)</label>
+            <input type="number" name="fromCardId" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label>На карту (ID)</label>
+            <input type="number" name="toCardId" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label>Сумма</label>
+            <input type="number" step="0.01" name="amount" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Перевести</button>
+        <a th:href="@{/web/dashboard}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+</body>
+</html>
