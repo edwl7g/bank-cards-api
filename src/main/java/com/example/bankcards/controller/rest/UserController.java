@@ -32,6 +32,14 @@ public class UserController {
         this.userService = userService;
     }
 
+    @GetMapping("/accounts")
+    @PreAuthorize("isAuthenticated()")
+    public Page<AccountResponseDto> getUserAccounts(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return userService.getUserAccounts(currentUser.getUserId(), pageable);
+    }
+
     // Регистрация нового пользователя (было)
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")

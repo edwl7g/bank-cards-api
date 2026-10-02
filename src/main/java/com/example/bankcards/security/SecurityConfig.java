@@ -60,7 +60,7 @@ public class SecurityConfig {
     public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/web/public/**", "/web/login", "/web/register",
+                        .requestMatchers("/web/public/**", "/web/login",
                                 "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/error")
                         .permitAll()
                         .requestMatchers("/web/admin/**").hasRole("ADMIN")

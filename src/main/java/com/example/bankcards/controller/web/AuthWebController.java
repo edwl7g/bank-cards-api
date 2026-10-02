@@ -30,30 +30,6 @@ public class AuthWebController {
         return "login";
     }
 
-    // Показать страницу регистрации
-    @GetMapping("/register")
-    public String register(Model model) {
-        model.addAttribute("userDto", new UserRegistrationDto());
-        return "register";
-    }
-
-    // Обработка регистрации
-    @PostMapping("/register")
-    public String registerUser(@Valid @ModelAttribute("userDto") UserRegistrationDto dto,
-                               BindingResult result,
-                               Model model) {
-        if (result.hasErrors()) {
-            return "register";
-        }
-        try {
-            adminService.registerUser(dto);
-            return "redirect:/web/login?registered";
-        } catch (RuntimeException e) {
-            model.addAttribute("error", e.getMessage());
-            return "register";
-        }
-    }
-
     // Главная страница после входа
     @GetMapping("/dashboard")
     public String dashboard(Model model) {

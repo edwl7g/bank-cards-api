@@ -26,6 +26,15 @@ public class UserWebController {
         this.userService = userService;
     }
 
+    @GetMapping("/accounts")
+    public String getUserAccounts(@AuthenticationPrincipal CustomUserDetails currentUser,
+                                  @PageableDefault(size = 10) Pageable pageable,
+                                  Model model) {
+        model.addAttribute("accounts",
+                userService.getUserAccounts(currentUser.getUserId(), pageable));
+        return "user/accounts";
+    }
+
     // Список своих карт
     @GetMapping("/cards")
     public String getUserCards(@AuthenticationPrincipal CustomUserDetails currentUser,

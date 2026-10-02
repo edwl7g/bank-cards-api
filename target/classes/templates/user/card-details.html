@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Детали карты</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Детали карты</h1>
+        <a th:href="@{/web/user/cards}" class="btn btn-secondary">Назад к картам</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <p><b>ID:</b> <span th:text="${card.id}"></span></p>
+            <p><b>Номер:</b> <span th:text="${card.maskedNumber}"></span></p>
+
+            <!-- fullNumber для пользователя всегда null (showFullNumber=false) -->
+            <p th:if="${card.fullNumber != null}">
+                <b>Полный номер:</b> <span th:text="${card.fullNumber}"></span>
+            </p>
+
+            <p><b>Статус:</b> <span th:text="${card.cardStatus}"></span></p>
+            <p><b>Действительна до:</b> <span th:text="${card.validityPeriod}"></span></p>
+
+            <hr>
+            <p><b>Владелец:</b> <span th:text="${card.userFullName}"></span></p>
+            <p><b>Email:</b> <span th:text="${card.userEmail}"></span></p>
+
+            <hr>
+            <p><b>ID счёта:</b> <span th:text="${card.accountId}"></span></p>
+            <p><b>Баланс:</b> <span th:text="${card.balance}"></span></p>
+
+            <div class="mt-3">
+                <a class="btn btn-secondary"
+                   th:href="@{/web/user/cards/{id}/balance(id=${card.id})}">Баланс</a>
+                <a class="btn btn-warning"
+                   th:href="@{/web/user/cards}">К картам</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

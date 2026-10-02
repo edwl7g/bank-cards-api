@@ -1,5 +1,6 @@
 package com.example.bankcards.service;
 
+import com.example.bankcards.dto.AccountResponseDto;
 import com.example.bankcards.dto.CardDetailsDto;
 import com.example.bankcards.dto.CardResponseDto;
 import com.example.bankcards.entity.Card;
@@ -33,6 +34,14 @@ public class UserService {
         this.cardRepository = cardRepository;
         this.accountRepository = accountRepository;
         this.userRepository = userRepository;
+    }
+
+    public Page<AccountResponseDto> getUserAccounts(Long userId, Pageable pageable) {
+        if (!userRepository.existsById(userId)) {
+            throw new EntityNotFoundException("User not found: " + userId);
+        }
+        return accountRepository.findByUserId(userId, pageable)
+                .map(acc -> new AccountResponseDto(acc.getId(), acc.getBalance()));
     }
 
     // Просмотр своих карт с поиском по номеру карты и пагинацией
