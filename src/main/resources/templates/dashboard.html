@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Личный кабинет</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* ===== Фон: реальное фото, закат над финансовым районом Франкфурта (Unsplash, бесплатная лицензия) =====
+           Запасные варианты: замените идентификатор photo-... в url() ниже
+             photo-1762430259780-28ffac74916c  Манхэттен в сумерках
+             photo-1773176647951-d8f618dee942  закат над горной долиной, Швейцария
+             photo-1778789206978-a167b549aafe  закат над тёмными горами, Юра */
+        body { background-color: #2a1f3d; min-height: 100vh; }
+        .page-bg {
+            position: fixed; inset: 0; z-index: -1;
+            background:
+                linear-gradient(rgba(10,14,24,.30), rgba(10,14,24,.55)),
+                url("https://images.unsplash.com/photo-1780563897347-389f0a562371?auto=format&fit=crop&w=2400&q=75")
+                center / cover no-repeat;
+        }
+        /* Тексты прямо на фоне делаем светлыми */
+        .container h1, .container h3, .container > p {
+            color: #fff; text-shadow: 0 1px 8px rgba(0,0,0,.5);
+        }
+        .container hr { border-color: #fff; opacity: .5; }
+        /* Карточки: полупрозрачное стекло, чтобы текст читался */
+        .card {
+            background: rgba(255,255,255,.88);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border: 0; box-shadow: 0 8px 24px rgba(0,0,0,.25);
+        }
+    </style>
+</head>
+<body>
+<div class="page-bg" aria-hidden="true"></div>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <h1>Добро пожаловать!</h1>
+        <form th:action="@{/web/logout}" method="post" class="d-inline">
+            <button type="submit" class="btn btn-danger">Выйти</button>
+        </form>
+    </div>
+    <p>Вы успешно вошли в систему.</p>
+
+    <!-- Общие ссылки для всех пользователей -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Мои карты</h5>
+                    <a th:href="@{/web/user/cards}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Перевод</h5>
+                    <a th:href="@{/web/user/transfer}" class="btn btn-primary">Перевести</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Мои счета</h5>
+                    <a th:href="@{/web/user/accounts}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Административная панель (видна только админу) -->
+    <div th:if="${isAdmin}" class="mt-5">
+        <hr>
+        <h3>Администрирование</h3>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Пользователи</h5>
+                        <a th:href="@{/web/admin/users}" class="btn btn-warning btn-sm">Управление</a>
+                        <a th:href="@{/web/admin/users/create}" class="btn btn-success btn-sm">Создать</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Карты</h5>
+                        <a th:href="@{/web/admin/cards}" class="btn btn-warning btn-sm">Все карты</a>
+                        <a th:href="@{/web/admin/cards/create}" class="btn btn-success btn-sm">Создать</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Счета</h5>
+                        <a th:href="@{/web/admin/accounts/create}" class="btn btn-success btn-sm">Создать счёт</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mt-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Swagger API</h5>
+                        <a th:href="@{/swagger-ui/index.html}" class="btn btn-info btn-sm">Открыть</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

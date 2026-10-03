@@ -6,11 +6,13 @@ import com.example.bankcards.entity.Card;
 import com.example.bankcards.entity.User;
 import com.example.bankcards.entity.enums.CardStatus;
 import com.example.bankcards.entity.enums.UserRole;
+import com.example.bankcards.entity.enums.UserStatus;
 import com.example.bankcards.repository.AccountRepository;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.repository.UserRepository;
 import com.example.bankcards.security.CustomUserDetails;
 import com.example.bankcards.util.CardUtil;
+import com.example.bankcards.util.HmacUtil;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -298,4 +300,41 @@ public class AdminService {
         return sb.toString().replaceAll("(.{4})", "$1-").replaceFirst("-$", ""); // 4 цифры + дефис
     }
 
+    public UserUpdateDto getUserForUpdate(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+        return new UserUpdateDto(
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getPhone(),
+                user.getIdentityDocumentNumber(),
+                user.getRole(),
+                user.getUserStatus()
+        );
+    }
+
+    @Transactional
+    public void registerUser(UserRegistrationDto dto) {
+        String emailHash = HmacUtil.hmac(dto.getEmail());
+        if (userRepository.findByEmailHash(emailHash).isPresent()) {
+            throw new RuntimeException("Пользователь с таким email уже зарегистрирован");
+        }
+
+        User user = new User();
+        user.setFirstName(dto.getFirstName());
+        user.setLastName(dto.getLastName());
+        user.setEmail(dto.getEmail());
+        user.setEmailHash(emailHash);
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setRole(UserRole.USER);          // по умолчанию
+        user.setUserStatus(UserStatus.ACTIVE);
+
+        // Если в модели User поля phone и identityDocumentNumber обязательны,
+        // установите временные значения (или сделайте их nullable в БД)
+        user.setPhone("");                    // или null, если разрешено
+        user.setIdentityDocumentNumber("");   // или null
+
+        userRepository.save(user);
+    }
 }

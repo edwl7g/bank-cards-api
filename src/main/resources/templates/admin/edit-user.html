@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Редактировать пользователя</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <h2>Редактировать пользователя (ID: <span th:text="${userId}"></span>)</h2>
+    <form th:action="@{/web/admin/users/{userId}/edit(userId=${userId})}" th:object="${userDto}" method="post">
+        <div class="mb-3">
+            <label>Имя</label>
+            <input type="text" th:field="*{firstName}" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label>Фамилия</label>
+            <input type="text" th:field="*{lastName}" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label>Email</label>
+            <input type="email" th:field="*{email}" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label>Телефон</label>
+            <input type="text" th:field="*{phone}" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label>Документ</label>
+            <input type="text" th:field="*{identityDocumentNumber}" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label>Роль</label>
+            <select th:field="*{userRole}" class="form-select">
+                <option th:each="role : ${T(com.example.bankcards.entity.enums.UserRole).values()}"
+                        th:value="${role}" th:text="${role}"></option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label>Статус</label>
+            <select th:field="*{userStatus}" class="form-select">
+                <option th:each="status : ${T(com.example.bankcards.entity.enums.UserStatus).values()}"
+                        th:value="${status}" th:text="${status}"></option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Обновить</button>
+        <a th:href="@{/web/admin/users}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+</body>
+</html>

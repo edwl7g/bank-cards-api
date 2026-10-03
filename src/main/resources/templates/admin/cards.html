@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Все карты</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between">
+        <h2>Карты</h2>
+        <div>
+            <a th:href="@{/web/admin/cards/create}" class="btn btn-success">+ Создать</a>
+            <a th:href="@{/web/dashboard}" class="btn btn-secondary">Назад</a>
+        </div>
+    </div>
+
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+    <table class="table table-striped mt-3">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Номер (маскированный)</th>
+            <th>Статус</th>
+            <th>Владелец</th>
+            <th>Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="card : ${cards.content}">
+            <td th:text="${card.id}"></td>
+            <td th:text="${card.maskedNumber}"></td>
+            <td th:text="${card.cardStatus}"></td>
+            <td th:text="${card.userFullName}"></td>
+            <td>
+                <a th:href="@{/web/admin/cards/{id}(id=${card.id})}" class="btn btn-sm btn-info">Детали</a>
+                <form th:action="@{/web/admin/cards/{id}/block(id=${card.id})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-warning">Блок</button>
+                </form>
+                <form th:action="@{/web/admin/cards/{id}/activate(id=${card.id})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-success">Активировать</button>
+                </form>
+                <form th:action="@{/web/admin/cards/{id}/delete(id=${card.id})}" method="post" style="display:inline;" onsubmit="return confirm('Удалить карту?')">
+                    <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <nav th:if="${cards.totalPages > 1}">
+        <ul class="pagination">
+            <li class="page-item" th:classappend="${cards.first} ? 'disabled'">
+                <a class="page-link" th:href="@{/web/admin/cards(page=${cards.number-1})}">Предыдущая</a>
+            </li>
+            <li class="page-item" th:classappend="${cards.last} ? 'disabled'">
+                <a class="page-link" th:href="@{/web/admin/cards(page=${cards.number+1})}">Следующая</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+</body>
+</html>
